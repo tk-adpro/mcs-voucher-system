@@ -5,7 +5,6 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 
-// TODO add discount amount
 @Getter @Setter
 public class Voucher {
     private String voucherId;

@@ -51,9 +51,7 @@ public class VoucherRepository {
         return existingVoucher;
     }
 
-    public Voucher deleteVoucher (Voucher voucherToDelete) {
-
-        String voucherId = voucherToDelete.getVoucherId();
+    public Voucher deleteVoucher (String voucherId) {
 
         for (Voucher voucher : vouchers) {
             if (voucher.getVoucherId().equals(voucherId)) {

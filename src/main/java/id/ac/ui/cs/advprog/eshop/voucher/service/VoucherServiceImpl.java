@@ -26,8 +26,8 @@ public class VoucherServiceImpl implements VoucherService<Voucher> {
     }
 
     @Override
-    public Voucher deleteVoucher (Voucher voucher) {
-        return voucherRepository.deleteVoucher(voucher);
+    public Voucher deleteVoucher (String voucherId) {
+        return voucherRepository.deleteVoucher(voucherId);
     }
 
     @Override
