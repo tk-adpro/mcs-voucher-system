@@ -103,8 +103,8 @@ class ProductServiceImplTest {
         LocalDate endDate = LocalDate.of(2024, 5, 24);
         voucher.setVoucherEndDate(endDate);
 
-        Mockito.when(voucherRepository.deleteVoucher(voucher)).thenReturn(voucher);
-        assertEquals(voucher, voucherService.deleteVoucher(voucher));
+        Mockito.when(voucherRepository.deleteVoucher(voucher.getVoucherId())).thenReturn(voucher);
+        assertEquals(voucher, voucherService.deleteVoucher(voucher.getVoucherId()));
     }
 
     @Test

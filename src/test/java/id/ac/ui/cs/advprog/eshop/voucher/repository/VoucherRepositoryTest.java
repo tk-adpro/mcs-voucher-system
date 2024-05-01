@@ -337,7 +337,7 @@ class ProductRepositoryTest {
         voucherRepository.createVoucher(voucher);
 
         // Delete Voucher
-        voucherRepository.deleteVoucher(voucher);
+        voucherRepository.deleteVoucher("eb558e9f-1c39-460e-8860-71af6af63bd6");
 
         Voucher deletedProduct = voucherRepository.getVoucherById("eb558e9f-1c39-460e-8860-71af6af63bd6");
         assertNull(deletedProduct);
@@ -347,6 +347,6 @@ class ProductRepositoryTest {
     void testDeleteProduct_IfVoucherNotFound(){
         // Create Random Voucher Without Inserting it to Repository
         Voucher voucher = new Voucher();
-        assertThrows(ArrayIndexOutOfBoundsException.class, () -> voucherRepository.deleteVoucher(voucher));
+        assertThrows(ArrayIndexOutOfBoundsException.class, () -> voucherRepository.deleteVoucher("randomVoucherId"));
     }
 }
