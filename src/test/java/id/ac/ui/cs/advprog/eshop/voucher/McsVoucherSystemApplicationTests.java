@@ -8,6 +8,7 @@ class McsVoucherSystemApplicationTests {
 
     @Test
     void contextLoads() {
+        McsVoucherSystemApplication.main(new String[] {});
     }
 
 }
