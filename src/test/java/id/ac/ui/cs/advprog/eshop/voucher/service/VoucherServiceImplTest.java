@@ -3,133 +3,91 @@ package id.ac.ui.cs.advprog.eshop.voucher.service;
 import id.ac.ui.cs.advprog.eshop.voucher.model.Voucher;
 import id.ac.ui.cs.advprog.eshop.voucher.repository.VoucherRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class ProductServiceImplTest {
+class VoucherServiceImplTest {
     @InjectMocks
-    private  VoucherServiceImpl voucherService;
+    private VoucherServiceImpl voucherService;
 
     @Mock
     private VoucherRepository voucherRepository;
 
-    @Test
-    void testCreateVoucher() {
-        // Create Voucher
-        Voucher voucher = new Voucher();
+    private Voucher voucher;
 
-        voucher.setVoucherId("eb558e9f-1c39-460e-8860-71af6af63bd6");
-        voucher.setVoucherName("Gratis Ongkir");
-        voucher.setVoucherDescription("Syarat dan Ketentuan Berlaku");
-        voucher.setVoucherDiscount(50);
-        voucher.setVoucherUsageLimit(50);
-
-        LocalDate startDate = LocalDate.of(2024, 4, 24);
-        voucher.setVoucherStartDate(startDate);
-
-        LocalDate endDate = LocalDate.of(2024, 5, 24);
-        voucher.setVoucherEndDate(endDate);
-
-        Mockito.when(voucherRepository.createVoucher(voucher)).thenReturn(voucher);
-        assertEquals(voucher, voucherService.createVoucher(voucher));
+    @BeforeEach
+    void setUp() {
+        voucher = new Voucher();
+        voucher.setVoucherId("p1");
+        voucher.setVoucherName("Voucher 1");
+        voucher.setVoucherUsageLimit(1);
     }
 
     @Test
-    void testGetVoucherById() {
-        // Create Voucher
-        Voucher voucher = new Voucher();
-
-        voucher.setVoucherId("eb558e9f-1c39-460e-8860-71af6af63bd6");
-        voucher.setVoucherName("Gratis Ongkir");
-        voucher.setVoucherDescription("Syarat dan Ketentuan Berlaku");
-        voucher.setVoucherDiscount(50);
-        voucher.setVoucherUsageLimit(50);
-
-        LocalDate startDate = LocalDate.of(2024, 4, 24);
-        voucher.setVoucherStartDate(startDate);
-
-        LocalDate endDate = LocalDate.of(2024, 5, 24);
-        voucher.setVoucherEndDate(endDate);
-
-        Mockito.when(voucherRepository.getVoucherById("eb558e9f-1c39-460e-8860-71af6af63bd6")).thenReturn(voucher);
-        assertEquals(voucher, voucherService.getVoucherById("eb558e9f-1c39-460e-8860-71af6af63bd6"));
+    void testCreateProduct() {
+        when(voucherRepository.save(voucher)).thenReturn(voucher);
+        Voucher createdProduct = voucherService.create(voucher);
+        verify(voucherRepository).save(voucher);
+        assertEquals(voucher.getVoucherId(), createdProduct.getVoucherId());
     }
 
     @Test
-    void testEditVoucher() {
-        // Create Voucher
-        Voucher voucher = new Voucher();
+    void testFindAllProducts() {
+        Voucher product2 = new Voucher();
+        product2.setVoucherId("p2");
+        product2.setVoucherName("Voucher 2");
+        when(voucherRepository.findAll()).thenReturn(List.of(voucher, product2));
 
-        voucher.setVoucherId("eb558e9f-1c39-460e-8860-71af6af63bd6");
-        voucher.setVoucherName("Gratis Ongkir");
-        voucher.setVoucherDescription("Syarat dan Ketentuan Berlaku");
-        voucher.setVoucherDiscount(50);
-        voucher.setVoucherUsageLimit(50);
-
-        LocalDate startDate = LocalDate.of(2024, 4, 24);
-        voucher.setVoucherStartDate(startDate);
-
-        LocalDate endDate = LocalDate.of(2024, 5, 24);
-        voucher.setVoucherEndDate(endDate);
-
-        Mockito.when(voucherRepository.editVoucher(voucher)).thenReturn(voucher);
-        assertEquals(voucher, voucherService.editVoucher(voucher));
+        List<Voucher> products = voucherService.findAll();
+        assertEquals(2, products.size());
+        assertTrue(products.contains(voucher) && products.contains(product2));
     }
 
     @Test
-    void testDeleteVoucher() {
-        // Create Voucher
-        Voucher voucher = new Voucher();
-
-        voucher.setVoucherId("eb558e9f-1c39-460e-8860-71af6af63bd6");
-        voucher.setVoucherName("Gratis Ongkir");
-        voucher.setVoucherDescription("Syarat dan Ketentuan Berlaku");
-        voucher.setVoucherDiscount(50);
-        voucher.setVoucherUsageLimit(50);
-
-        LocalDate startDate = LocalDate.of(2024, 4, 24);
-        voucher.setVoucherStartDate(startDate);
-
-        LocalDate endDate = LocalDate.of(2024, 5, 24);
-        voucher.setVoucherEndDate(endDate);
-
-        Mockito.when(voucherRepository.deleteVoucher(voucher.getVoucherId())).thenReturn(voucher);
-        assertEquals(voucher, voucherService.deleteVoucher(voucher.getVoucherId()));
+    void testDeleteProductSuccess() {
+        doNothing().when(voucherRepository).deleteById(voucher.getVoucherId());
+        voucherService.delete(voucher.getVoucherId());
+        verify(voucherRepository).deleteById(voucher.getVoucherId());
     }
 
     @Test
-    void testFindAllVoucher() {
-        // Create Voucher
-        Voucher voucher = new Voucher();
+    void testDeleteProductFailure() {
+        doThrow(new IllegalArgumentException("Voucher not found")).when(voucherRepository).deleteById("p3");
+        assertThrows(IllegalArgumentException.class, () -> voucherService.delete("p3"));
+        verify(voucherRepository).deleteById("p3");
+    }
 
-        voucher.setVoucherId("eb558e9f-1c39-460e-8860-71af6af63bd6");
-        voucher.setVoucherName("Gratis Ongkir");
-        voucher.setVoucherDescription("Syarat dan Ketentuan Berlaku");
-        voucher.setVoucherDiscount(50);
-        voucher.setVoucherUsageLimit(50);
+    @Test
+    void testFindProductByIdFound() {
+        when(voucherRepository.findById(voucher.getVoucherId())).thenReturn(Optional.of(voucher));
+        Voucher foundProduct = voucherService.findById(voucher.getVoucherId()).orElse(null);
+        assertNotNull(foundProduct);
+        assertEquals(voucher.getVoucherId(), foundProduct.getVoucherId());
+    }
 
-        LocalDate startDate = LocalDate.of(2024, 4, 24);
-        voucher.setVoucherStartDate(startDate);
+    @Test
+    void testFindProductByIdNotFound() {
+        when(voucherRepository.findById("unknown")).thenReturn(Optional.empty());
+        Optional<Voucher> foundProduct = voucherService.findById("unknown");
+        assertFalse(foundProduct.isPresent());
+    }
 
-        LocalDate endDate = LocalDate.of(2024, 5, 24);
-        voucher.setVoucherEndDate(endDate);
-
-        ArrayList<Voucher> products = new ArrayList<>();
-        products.add(voucher);
-
-        Iterator<Voucher> productIterator = products.iterator();
-
-        Mockito.when(voucherRepository.findAllVoucher()).thenReturn(productIterator);
-        assertEquals(products, voucherService.findAllVoucher());
+    @Test
+    void testUpdateProduct() {
+        when(voucherRepository.save(voucher)).thenReturn(voucher);
+        Voucher updatedProduct = voucherService.update(voucher);
+        verify(voucherRepository).save(voucher);
+        assertEquals(voucher.getVoucherId(), updatedProduct.getVoucherId());
     }
 }
