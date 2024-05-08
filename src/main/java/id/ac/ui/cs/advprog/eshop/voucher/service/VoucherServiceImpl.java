@@ -8,38 +8,38 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
-public class VoucherServiceImpl implements VoucherService<Voucher> {
+public class VoucherServiceImpl implements VoucherService {
 
     @Autowired
     private VoucherRepository voucherRepository;
 
     @Override
-    public Voucher createVoucher (Voucher voucher) {
-        return voucherRepository.createVoucher(voucher);
+    public Voucher create(Voucher voucher) {
+        return voucherRepository.save(voucher);
     }
 
     @Override
-    public Voucher editVoucher(Voucher voucher) {
-        return voucherRepository.editVoucher(voucher);
+    public List<Voucher> findAll() {
+        List<Voucher> allProducts = voucherRepository.findAll();
+        return allProducts;
     }
 
     @Override
-    public Voucher deleteVoucher (String voucherId) {
-        return voucherRepository.deleteVoucher(voucherId);
+    public boolean delete(String voucherId) {
+        voucherRepository.deleteById(voucherId);
+        return true;
     }
 
     @Override
-    public Voucher getVoucherById (String VoucherId) {
-        return voucherRepository.getVoucherById(VoucherId);
+    public Optional<Voucher> findById(String productId) {
+        return voucherRepository.findById(productId);
     }
 
     @Override
-    public List<Voucher> findAllVoucher() {
-        Iterator<Voucher> VoucherIterator = voucherRepository.findAllVoucher();
-        List<Voucher> allVoucher = new ArrayList<>();
-        VoucherIterator.forEachRemaining(allVoucher::add);
-        return allVoucher;
+    public Voucher update(Voucher voucher) {
+        return voucherRepository.save(voucher);
     }
 }
