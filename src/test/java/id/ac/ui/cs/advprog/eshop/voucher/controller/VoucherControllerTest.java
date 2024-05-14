@@ -1,6 +1,5 @@
 package id.ac.ui.cs.advprog.eshop.voucher.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import id.ac.ui.cs.advprog.eshop.voucher.model.Voucher;
 import id.ac.ui.cs.advprog.eshop.voucher.service.VoucherServiceImpl;
@@ -17,6 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -25,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class VoucherControllerTest {
 
     @InjectMocks
-    VoucherController VoucherController;
+    id.ac.ui.cs.advprog.eshop.voucher.controller.VoucherController VoucherController;
 
     @Mock
     private VoucherServiceImpl voucherService;
@@ -35,68 +35,82 @@ public class VoucherControllerTest {
     public void setup() {
         mockMvc = MockMvcBuilders.standaloneSetup(VoucherController).build();
     }
-
     @Test
-    void voucherListTest() throws Exception {
-        List<Voucher> vouchers = Arrays.asList(new Voucher(), new Voucher());
+    public void testGetAllProducts() throws Exception {
+        // Mocking the service response
+        List<Voucher> products = Arrays.asList(new Voucher(), new Voucher());
+        when(voucherService.findAll()).thenReturn(products);
 
-        when(voucherService.findAllVoucher()).thenReturn(vouchers);
         mockMvc.perform(get("/voucher-api/list"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
-                .andExpect(jsonPath("$.length()").value(vouchers.size()));
+                .andExpect(jsonPath("$.length()").value(products.size()));
 
-        verify(voucherService, times(1)).findAllVoucher();
+        verify(voucherService, times(1)).findAll();
     }
 
     @Test
-    void createVoucherTest() throws Exception {
-        Voucher voucher = new Voucher();
-        voucher.setVoucherId("eb558e9f-1c39-460e-8860-71af6af63bd6");
+    public void testGetProductById() throws Exception {
+        String voucherId = "1";
+        Voucher product = new Voucher();
+        product.setVoucherId(voucherId);
 
-        when(voucherService.createVoucher(any(Voucher.class))).thenReturn(voucher);
-        mockMvc.perform(post("/voucher-api/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(voucher)))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.voucherId").value(voucher.getVoucherId()));
+        when(voucherService.findById(voucherId)).thenReturn(Optional.of(product));
 
-        verify(voucherService, times(1)).createVoucher(any(Voucher.class));
-    }
-
-    @Test
-    void editProductTest() throws Exception {
-        String voucherId = "eb558e9f-1c39-460e-8860-71af6af63bd6";
-        Voucher voucher = new Voucher();
-        voucher.setVoucherId(voucherId);
-
-        when(voucherService.getVoucherById(voucherId)).thenReturn(voucher);
-
-        when(voucherService.editVoucher(any(Voucher.class))).thenReturn(voucher);
-
-        mockMvc.perform(put("/voucher-api/edit/{voucherId}", voucherId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(voucher)))
+        mockMvc.perform(get("/voucher-api/get/{voucherId}", voucherId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.voucherId").value(voucher.getVoucherId()));
+                .andExpect(jsonPath("$.voucherId").value(voucherId));
 
-        verify(voucherService, times(1)).editVoucher(any(Voucher.class));
+        verify(voucherService, times(1)).findById(voucherId);
     }
 
     @Test
-    void deleteVoucherTest() throws Exception {
-        String voucherId = "eb558e9f-1c39-460e-8860-71af6af63bd6";
-        Voucher voucher = new Voucher();
-        voucher.setVoucherId(voucherId);
+    public void testCreateProduct() throws Exception {
+        Voucher product = new Voucher();
+        product.setVoucherName("Test Voucher");
 
-        when(voucherService.deleteVoucher(voucherId)).thenReturn(voucher);
+        when(voucherService.create(any(Voucher.class))).thenReturn(product);
+        mockMvc.perform(post("/voucher-api/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.voucherName").value(product.getVoucherName()));
 
-        mockMvc.perform(delete("/voucher-api/delete/{voucherId}", voucherId))
+        verify(voucherService, times(1)).create(any(Voucher.class));
+    }
+
+    @Test
+    public void testUpdateProduct() throws Exception {
+        String voucherId = "1";
+        Voucher product = new Voucher();
+        product.setVoucherId(voucherId);
+        product.setVoucherName("Updated Voucher");
+
+        when(voucherService.findById(voucherId)).thenReturn(Optional.of(product));
+        when(voucherService.update(any(Voucher.class))).thenReturn(product);
+
+        mockMvc.perform(put("/voucher-api/edit/{productId}", voucherId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.voucherName").value(product.getVoucherName()));
+
+        verify(voucherService, times(1)).update(any(Voucher.class));
+    }
+
+    @Test
+    public void testDeleteProduct() throws Exception {
+        String voucherId = "1";
+
+        when(voucherService.delete(voucherId)).thenReturn(true);
+
+        mockMvc.perform(delete("/voucher-api/delete/{productId}", voucherId))
                 .andExpect(status().isNoContent());
 
-        verify(voucherService, times(1)).deleteVoucher(voucherId);
+        verify(voucherService, times(1)).delete(voucherId);
     }
 }
