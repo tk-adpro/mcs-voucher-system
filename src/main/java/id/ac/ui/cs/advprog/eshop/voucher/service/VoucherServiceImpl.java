@@ -31,16 +31,16 @@ public class VoucherServiceImpl implements VoucherService {
 
         Voucher.VoucherBuilder builder = new Voucher.VoucherBuilder(voucherId, voucherName, voucherDescription, voucherDiscount);
 
-        if (Objects.equals(voucherType, "Expired Date and Usage Limit")) {
-            builder.setVoucherDate(voucherStartDate, voucherEndDate);
+        if (Objects.equals(voucherType, "Usage Limit")) {
             builder.setUsageLimit(voucherUsageLimit);
-            builder.setType("Expired Date and Usage Limit");
+            builder.setType("Usage Limit");
         } else if (Objects.equals(voucherType, "Expired Date")) {
             builder.setVoucherDate(voucherStartDate, voucherEndDate);
             builder.setType("Expired Date");
-        } else if (Objects.equals(voucherType, "Usage Limit")) {
+        } else {
+            builder.setVoucherDate(voucherStartDate, voucherEndDate);
             builder.setUsageLimit(voucherUsageLimit);
-            builder.setType("Usage Limit");
+            builder.setType("Expired Date and Usage Limit");
         }
 
         voucher = builder.build();
@@ -65,16 +65,16 @@ public class VoucherServiceImpl implements VoucherService {
 
         Voucher.VoucherBuilder builder = new Voucher.VoucherBuilder(voucherId, voucherName, voucherDescription, voucherDiscount);
 
-        if (Objects.equals(voucherType, "Expired Date and Usage Limit")) {
-            builder.setVoucherDate(voucherStartDate, voucherEndDate);
+        if (Objects.equals(voucherType, "Usage Limit")) {
             builder.setUsageLimit(voucherUsageLimit);
-            builder.setType("Expired Date and Usage Limit");
+            builder.setType("Usage Limit");
         } else if (Objects.equals(voucherType, "Expired Date")) {
             builder.setVoucherDate(voucherStartDate, voucherEndDate);
             builder.setType("Expired Date");
-        } else if (Objects.equals(voucherType, "Usage Limit")) {
+        } else {
+            builder.setVoucherDate(voucherStartDate, voucherEndDate);
             builder.setUsageLimit(voucherUsageLimit);
-            builder.setType("Usage Limit");
+            builder.setType("Expired Date and Usage Limit");
         }
 
         voucher = builder.build();

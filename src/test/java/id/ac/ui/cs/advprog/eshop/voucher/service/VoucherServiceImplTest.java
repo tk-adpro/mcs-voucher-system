@@ -50,6 +50,30 @@ public class VoucherServiceImplTest {
     }
 
     @Test
+    void testCreateVoucher_ExpiredDate() {
+        voucher.setVoucherType("Expired Date");
+        when(voucherRepository.save(any(Voucher.class))).thenReturn(voucher);
+
+        Voucher createdVoucher = voucherService.create(voucher);
+
+        assertNotNull(createdVoucher);
+        assertEquals(voucher.getVoucherId(), createdVoucher.getVoucherId());
+        verify(voucherRepository, times(1)).save(any(Voucher.class));
+    }
+
+    @Test
+    void testCreateVoucher_UsageLimit() {
+        voucher.setVoucherType("Usage Limit");
+        when(voucherRepository.save(any(Voucher.class))).thenReturn(voucher);
+
+        Voucher createdVoucher = voucherService.create(voucher);
+
+        assertNotNull(createdVoucher);
+        assertEquals(voucher.getVoucherId(), createdVoucher.getVoucherId());
+        verify(voucherRepository, times(1)).save(any(Voucher.class));
+    }
+
+    @Test
     void testUpdateVoucher() {
         when(voucherRepository.save(any(Voucher.class))).thenReturn(voucher);
 
@@ -58,6 +82,44 @@ public class VoucherServiceImplTest {
         assertNotNull(updatedVoucher);
         assertEquals(voucher.getVoucherId(), updatedVoucher.getVoucherId());
         verify(voucherRepository, times(1)).save(any(Voucher.class));
+    }
+
+    @Test
+    void testUpdateVoucher_ExpiredDate() {
+        voucher.setVoucherType("Expired Date");
+        when(voucherRepository.save(any(Voucher.class))).thenReturn(voucher);
+
+        Voucher updatedVoucher = voucherService.update(voucher);
+
+        assertNotNull(updatedVoucher);
+        assertEquals(voucher.getVoucherId(), updatedVoucher.getVoucherId());
+        verify(voucherRepository, times(1)).save(any(Voucher.class));
+    }
+
+    @Test
+    void testUpdateVoucher_UsageLimit() {
+        voucher.setVoucherType("Usage Limit");
+        when(voucherRepository.save(any(Voucher.class))).thenReturn(voucher);
+
+        Voucher updatedVoucher = voucherService.update(voucher);
+
+        assertNotNull(updatedVoucher);
+        assertEquals(voucher.getVoucherId(), updatedVoucher.getVoucherId());
+        verify(voucherRepository, times(1)).save(any(Voucher.class));
+    }
+
+    @Test
+    void testUpdateVoucher_UsageLimit_SetUsageLimit() {
+        voucher.setVoucherType("Usage Limit");
+        when(voucherRepository.save(any(Voucher.class))).thenReturn(voucher);
+
+        Voucher updatedVoucher = voucherService.update(voucher);
+
+        assertNotNull(updatedVoucher);
+        assertEquals(voucher.getVoucherId(), updatedVoucher.getVoucherId());
+        verify(voucherRepository, times(1)).save(any(Voucher.class));
+
+        assertEquals(voucher.getVoucherUsageLimit(), updatedVoucher.getVoucherUsageLimit());
     }
 
     @Test
