@@ -11,5 +11,5 @@ ENV JDBC_DATABASE_USERNAME ${JDBC_DATABASE_USERNAME}
 
 WORKDIR /app
 EXPOSE 8080
-ENTRYPOINT ["java"]
-CMD ["-jar", "app.jar"]
+COPY ./voucher-0.0.1-SNAPSHOT.jar /app
+CMD ["java","-jar","voucher-0.0.1-SNAPSHOT.jar"]
