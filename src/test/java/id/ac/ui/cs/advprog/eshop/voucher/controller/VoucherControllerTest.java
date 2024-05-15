@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -36,8 +37,7 @@ public class VoucherControllerTest {
         mockMvc = MockMvcBuilders.standaloneSetup(VoucherController).build();
     }
     @Test
-    public void testGetAllProducts() throws Exception {
-        // Mocking the service response
+    public void testGetAllVouchers() throws Exception {
         List<Voucher> products = Arrays.asList(new Voucher(), new Voucher());
         when(voucherService.findAll()).thenReturn(products);
 
@@ -51,7 +51,7 @@ public class VoucherControllerTest {
     }
 
     @Test
-    public void testGetProductById() throws Exception {
+    public void testGetVoucherById() throws Exception {
         String voucherId = "1";
         Voucher product = new Voucher();
         product.setVoucherId(voucherId);
@@ -67,7 +67,19 @@ public class VoucherControllerTest {
     }
 
     @Test
-    public void testCreateProduct() throws Exception {
+    public void testGetVoucherByIdNotFound() throws Exception {
+        String voucherId = "1";
+
+        when(voucherService.findById(voucherId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/voucher-api/get/{voucherId}", voucherId))
+                .andExpect(status().isNotFound());
+
+        verify(voucherService, times(1)).findById(voucherId);
+    }
+
+    @Test
+    public void testCreateVoucher() throws Exception {
         Voucher product = new Voucher();
         product.setVoucherName("Test Voucher");
 
@@ -83,7 +95,7 @@ public class VoucherControllerTest {
     }
 
     @Test
-    public void testUpdateProduct() throws Exception {
+    public void testEditVoucher() throws Exception {
         String voucherId = "1";
         Voucher product = new Voucher();
         product.setVoucherId(voucherId);
@@ -103,13 +115,42 @@ public class VoucherControllerTest {
     }
 
     @Test
-    public void testDeleteProduct() throws Exception {
+    public void testEditVoucherNotFound() throws Exception {
+        String voucherId = "1";
+        Voucher voucher = new Voucher();
+
+        // Mocking the service to return an empty optional when findById is called
+        when(voucherService.findById(voucherId)).thenReturn(Optional.empty());
+
+        mockMvc.perform(put("/voucher-api/edit/{voucherId}", voucherId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(voucher)))
+                .andExpect(status().isNotFound());
+
+        verify(voucherService, times(1)).findById(voucherId);
+        verify(voucherService, never()).update(any(Voucher.class));
+    }
+
+    @Test
+    public void testDeleteVoucher() throws Exception {
         String voucherId = "1";
 
         when(voucherService.delete(voucherId)).thenReturn(true);
 
         mockMvc.perform(delete("/voucher-api/delete/{productId}", voucherId))
                 .andExpect(status().isNoContent());
+
+        verify(voucherService, times(1)).delete(voucherId);
+    }
+
+    @Test
+    public void testDeleteVoucherNotFound() throws Exception {
+        String voucherId = "1";
+
+        when(voucherService.delete(voucherId)).thenReturn(false);
+
+        mockMvc.perform(delete("/voucher-api/delete/{voucherId}", voucherId))
+                .andExpect(status().isNotFound());
 
         verify(voucherService, times(1)).delete(voucherId);
     }
