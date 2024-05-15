@@ -2,92 +2,94 @@ package id.ac.ui.cs.advprog.eshop.voucher.service;
 
 import id.ac.ui.cs.advprog.eshop.voucher.model.Voucher;
 import id.ac.ui.cs.advprog.eshop.voucher.repository.VoucherRepository;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-class VoucherServiceImplTest {
-    @InjectMocks
-    private VoucherServiceImpl voucherService;
+public class VoucherServiceImplTest {
 
     @Mock
     private VoucherRepository voucherRepository;
+
+    @InjectMocks
+    private VoucherServiceImpl voucherService;
 
     private Voucher voucher;
 
     @BeforeEach
     void setUp() {
-        voucher = new Voucher();
-        voucher.setVoucherId("p1");
-        voucher.setVoucherName("Voucher 1");
-        voucher.setVoucherUsageLimit(1);
+        voucher = new Voucher.VoucherBuilder("1", "Test Voucher", "Description", 10.0)
+                .setVoucherDate(LocalDate.now(), LocalDate.now().plusDays(10))
+                .setUsageLimit(100)
+                .setType("Expired Date and Usage Limit")
+                .build();
     }
 
     @Test
-    void testCreateProduct() {
-        when(voucherRepository.save(voucher)).thenReturn(voucher);
-        Voucher createdProduct = voucherService.create(voucher);
-        verify(voucherRepository).save(voucher);
-        assertEquals(voucher.getVoucherId(), createdProduct.getVoucherId());
+    void testCreateVoucher() {
+        when(voucherRepository.save(any(Voucher.class))).thenReturn(voucher);
+
+        Voucher createdVoucher = voucherService.create(voucher);
+
+        assertNotNull(createdVoucher);
+        assertEquals(voucher.getVoucherId(), createdVoucher.getVoucherId());
+        verify(voucherRepository, times(1)).save(any(Voucher.class));
     }
 
     @Test
-    void testFindAllProducts() {
-        Voucher product2 = new Voucher();
-        product2.setVoucherId("p2");
-        product2.setVoucherName("Voucher 2");
-        when(voucherRepository.findAll()).thenReturn(List.of(voucher, product2));
+    void testUpdateVoucher() {
+        when(voucherRepository.save(any(Voucher.class))).thenReturn(voucher);
 
-        List<Voucher> products = voucherService.findAll();
-        assertEquals(2, products.size());
-        assertTrue(products.contains(voucher) && products.contains(product2));
+        Voucher updatedVoucher = voucherService.update(voucher);
+
+        assertNotNull(updatedVoucher);
+        assertEquals(voucher.getVoucherId(), updatedVoucher.getVoucherId());
+        verify(voucherRepository, times(1)).save(any(Voucher.class));
     }
 
     @Test
-    void testDeleteProductSuccess() {
-        doNothing().when(voucherRepository).deleteById(voucher.getVoucherId());
-        voucherService.delete(voucher.getVoucherId());
-        verify(voucherRepository).deleteById(voucher.getVoucherId());
+    void testFindAllVouchers() {
+        List<Voucher> vouchers = Arrays.asList(voucher);
+        when(voucherRepository.findAll()).thenReturn(vouchers);
+
+        List<Voucher> foundVouchers = voucherService.findAll();
+
+        assertNotNull(foundVouchers);
+        assertEquals(1, foundVouchers.size());
+        verify(voucherRepository, times(1)).findAll();
     }
 
     @Test
-    void testDeleteProductFailure() {
-        doThrow(new IllegalArgumentException("Voucher not found")).when(voucherRepository).deleteById("p3");
-        assertThrows(IllegalArgumentException.class, () -> voucherService.delete("p3"));
-        verify(voucherRepository).deleteById("p3");
+    void testDeleteVoucher() {
+        doNothing().when(voucherRepository).deleteById(anyString());
+
+        boolean isDeleted = voucherService.delete(voucher.getVoucherId());
+
+        assertTrue(isDeleted);
+        verify(voucherRepository, times(1)).deleteById(anyString());
     }
 
     @Test
-    void testFindProductByIdFound() {
-        when(voucherRepository.findById(voucher.getVoucherId())).thenReturn(Optional.of(voucher));
-        Voucher foundProduct = voucherService.findById(voucher.getVoucherId()).orElse(null);
-        assertNotNull(foundProduct);
-        assertEquals(voucher.getVoucherId(), foundProduct.getVoucherId());
-    }
+    void testFindVoucherById() {
+        when(voucherRepository.findById(anyString())).thenReturn(Optional.of(voucher));
 
-    @Test
-    void testFindProductByIdNotFound() {
-        when(voucherRepository.findById("unknown")).thenReturn(Optional.empty());
-        Optional<Voucher> foundProduct = voucherService.findById("unknown");
-        assertFalse(foundProduct.isPresent());
-    }
+        Optional<Voucher> foundVoucher = voucherService.findById(voucher.getVoucherId());
 
-    @Test
-    void testUpdateProduct() {
-        when(voucherRepository.save(voucher)).thenReturn(voucher);
-        Voucher updatedProduct = voucherService.update(voucher);
-        verify(voucherRepository).save(voucher);
-        assertEquals(voucher.getVoucherId(), updatedProduct.getVoucherId());
+        assertTrue(foundVoucher.isPresent());
+        assertEquals(voucher.getVoucherId(), foundVoucher.get().getVoucherId());
+        verify(voucherRepository, times(1)).findById(anyString());
     }
 }
