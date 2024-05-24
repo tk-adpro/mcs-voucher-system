@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+
 @Entity
 @Table(name = "voucher")
 @Getter @Setter
@@ -39,6 +40,7 @@ public class Voucher {
 
     public Voucher() {
     }
+
     private Voucher(VoucherBuilder builder) {
         this.voucherId = builder.voucherId;
         this.voucherName = builder.voucherName;
@@ -66,6 +68,19 @@ public class Voucher {
         private int voucherUsageLimit;
 
         public VoucherBuilder(String voucherId, String voucherName, String voucherDescription, double voucherDiscount) {
+            if (voucherId == null || voucherId.isEmpty()) {
+                throw new NullPointerException("voucherId is required");
+            }
+            if (voucherName == null || voucherName.isEmpty()) {
+                throw new NullPointerException("voucherName is required");
+            }
+            if (voucherDescription == null || voucherDescription.isEmpty()) {
+                throw new NullPointerException("voucherDescription is required");
+            }
+            if (voucherDiscount <= 0 || voucherDiscount >= 100) {
+                throw new IllegalArgumentException("voucherDiscount must be between 0 and 100");
+            }
+
             this.voucherId = voucherId;
             this.voucherName = voucherName;
             this.voucherDescription = voucherDescription;
@@ -83,7 +98,7 @@ public class Voucher {
             return this;
         }
 
-        public VoucherBuilder setUsageLimit (int voucherUsageLimit) {
+        public VoucherBuilder setUsageLimit(int voucherUsageLimit) {
             this.voucherUsageLimit = voucherUsageLimit;
             return this;
         }

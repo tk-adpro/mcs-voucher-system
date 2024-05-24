@@ -41,7 +41,7 @@ public class VoucherControllerTest {
         List<Voucher> products = Arrays.asList(new Voucher(), new Voucher());
         when(voucherService.findAll()).thenReturn(products);
 
-        mockMvc.perform(get("/voucher-api/list"))
+        mockMvc.perform(get("/voucher-api/public/list"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$").isArray())
@@ -58,7 +58,7 @@ public class VoucherControllerTest {
 
         when(voucherService.findById(voucherId)).thenReturn(Optional.of(product));
 
-        mockMvc.perform(get("/voucher-api/get/{voucherId}", voucherId))
+        mockMvc.perform(get("/voucher-api/public/get/{voucherId}", voucherId))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.voucherId").value(voucherId));
@@ -72,7 +72,7 @@ public class VoucherControllerTest {
 
         when(voucherService.findById(voucherId)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/voucher-api/get/{voucherId}", voucherId))
+        mockMvc.perform(get("/voucher-api/public/get/{voucherId}", voucherId))
                 .andExpect(status().isNotFound());
 
         verify(voucherService, times(1)).findById(voucherId);
@@ -84,7 +84,7 @@ public class VoucherControllerTest {
         product.setVoucherName("Test Voucher");
 
         when(voucherService.create(any(Voucher.class))).thenReturn(product);
-        mockMvc.perform(post("/voucher-api/create")
+        mockMvc.perform(post("/voucher-api/admin/create")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(product)))
                 .andExpect(status().isCreated())
@@ -104,7 +104,7 @@ public class VoucherControllerTest {
         when(voucherService.findById(voucherId)).thenReturn(Optional.of(product));
         when(voucherService.update(any(Voucher.class))).thenReturn(product);
 
-        mockMvc.perform(put("/voucher-api/edit/{productId}", voucherId)
+        mockMvc.perform(put("/voucher-api/admin/edit/{productId}", voucherId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(product)))
                 .andExpect(status().isOk())
@@ -122,7 +122,7 @@ public class VoucherControllerTest {
         // Mocking the service to return an empty optional when findById is called
         when(voucherService.findById(voucherId)).thenReturn(Optional.empty());
 
-        mockMvc.perform(put("/voucher-api/edit/{voucherId}", voucherId)
+        mockMvc.perform(put("/voucher-api/admin/edit/{voucherId}", voucherId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(voucher)))
                 .andExpect(status().isNotFound());
@@ -137,7 +137,7 @@ public class VoucherControllerTest {
 
         when(voucherService.delete(voucherId)).thenReturn(true);
 
-        mockMvc.perform(delete("/voucher-api/delete/{productId}", voucherId))
+        mockMvc.perform(delete("/voucher-api/admin/delete/{productId}", voucherId))
                 .andExpect(status().isNoContent());
 
         verify(voucherService, times(1)).delete(voucherId);
@@ -149,7 +149,7 @@ public class VoucherControllerTest {
 
         when(voucherService.delete(voucherId)).thenReturn(false);
 
-        mockMvc.perform(delete("/voucher-api/delete/{voucherId}", voucherId))
+        mockMvc.perform(delete("/voucher-api/admin/delete/{voucherId}", voucherId))
                 .andExpect(status().isNotFound());
 
         verify(voucherService, times(1)).delete(voucherId);
