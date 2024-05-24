@@ -7,8 +7,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
-
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -17,10 +17,14 @@ public class SecurityConfig {
     @Autowired
     AuthenticationFilter authenticationFilter;
 
+    @Autowired
+    CorsConfigurationSource corsConfigurationSource; // Autowire CorsConfigurationSource
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource)) // Apply CORS configuration
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/**/public/**").permitAll()
                         .requestMatchers("/**/admin/**").hasRole("ADMIN")
