@@ -98,9 +98,9 @@ public class VoucherServiceImpl implements VoucherService {
 
         String voucherType = voucher.getVoucherType();
 
-        if ("Expired Date".equals(voucherType)) {
+        if (VOUCHER_TYPE_EXPIRED_DATE.equals(voucherType)) {
             return isDateValid;
-        } else if ("Usage Limit".equals(voucherType)) {
+        } else if (VOUCHER_TYPE_USAGE_LIMIT.equals(voucherType)) {
             return isUsageValid;
         } else {
             return isDateValid && isUsageValid;
@@ -115,8 +115,8 @@ public class VoucherServiceImpl implements VoucherService {
             String voucherType = voucher.getVoucherType();
 
             if (canUseVoucher(voucher)) {
-                if (Objects.equals(voucherType, "Usage Limit") ||
-                        Objects.equals(voucherType, "Expired Date and Usage Limit")){
+                if (Objects.equals(voucherType, VOUCHER_TYPE_USAGE_LIMIT) ||
+                        Objects.equals(voucherType, VOUCHER_TYPE_BOTH)){
                     voucher.setVoucherUsageLimit(voucher.getVoucherUsageLimit() - 1);
                 }
                 voucherRepository.save(voucher);
