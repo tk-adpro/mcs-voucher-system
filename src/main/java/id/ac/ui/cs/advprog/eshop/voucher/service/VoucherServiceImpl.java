@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -64,13 +65,62 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
+    public Optional<Voucher> findById(String voucherId) {
+        return voucherRepository.findById(voucherId);
+    }
+
+    @Override
     public boolean delete(String voucherId) {
         voucherRepository.deleteById(voucherId);
         return true;
     }
 
-    @Override
-    public Optional<Voucher> findById(String voucherId) {
-        return voucherRepository.findById(voucherId);
+    public boolean canUseVoucher(Voucher voucher) {
+        LocalDate today = LocalDate.now();
+
+        boolean isDateValid = true;
+        LocalDate startDate = voucher.getVoucherStartDate();
+        LocalDate endDate = voucher.getVoucherEndDate();
+
+        if (startDate != null && startDate.isAfter(today)) {
+            isDateValid = false;
+        }
+
+        if (endDate != null && endDate.isBefore(today)) {
+            isDateValid = false;
+        }
+
+        boolean isUsageValid = voucher.getVoucherUsageLimit() > 0;
+
+        String voucherType = voucher.getVoucherType();
+
+        if ("Expired Date".equals(voucherType)) {
+            return isDateValid;
+        } else if ("Usage Limit".equals(voucherType)) {
+            return isUsageValid;
+        } else {
+            return isDateValid && isUsageValid;
+        }
+    }
+
+
+    public Voucher useVoucher(String voucherId) {
+        Optional<Voucher> voucherOptional = voucherRepository.findById(voucherId);
+        if (voucherOptional.isPresent()) {
+            Voucher voucher = voucherOptional.get();
+            String voucherType = voucher.getVoucherType();
+
+            if (canUseVoucher(voucher)) {
+                if (Objects.equals(voucherType, "Usage Limit") ||
+                        Objects.equals(voucherType, "Expired Date and Usage Limit")){
+                    voucher.setVoucherUsageLimit(voucher.getVoucherUsageLimit() - 1);
+                }
+                voucherRepository.save(voucher);
+                return voucher;
+            }
+        } else {
+            throw new NoSuchElementException("Voucher cannot be used.");
+        }
+        throw new IllegalStateException("Voucher cannot be used.");
     }
 }

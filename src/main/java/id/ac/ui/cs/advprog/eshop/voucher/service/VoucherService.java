@@ -10,4 +10,6 @@ public interface VoucherService {
     Optional<Voucher> findById(String voucherId);
     boolean delete(String voucherId);
     Voucher update(Voucher voucher);
+
+    Voucher useVoucher(String voucherId);
 }
