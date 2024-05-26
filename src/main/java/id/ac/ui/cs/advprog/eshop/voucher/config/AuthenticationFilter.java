@@ -71,7 +71,7 @@ public class AuthenticationFilter extends OncePerRequestFilter {
                 );
             }
         } catch (Exception e){
-            throw new RuntimeException("Unauthorized access");
+            throw new SecurityException("Unauthorized access");
         }
         return null;
     }
