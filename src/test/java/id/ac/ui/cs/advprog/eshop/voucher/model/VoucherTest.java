@@ -68,17 +68,17 @@ public class VoucherTest {
     @Test
     void testVoucherBuilderMissingRequiredParameters() {
         Exception exception = assertThrows(NullPointerException.class, () -> {
-            new Voucher.VoucherBuilder(null, "Test Voucher", "Description", 10.0).build();
+            new Voucher.VoucherBuilder("1", null, "Description", 10.0).build();
         });
 
-        String expectedMessage = "voucherId";
+        String expectedMessage = "voucherName";
         String actualMessage = exception.getMessage();
 
         assertTrue(actualMessage.contains(expectedMessage));
     }
 
     @Test
-    void testVoucherBuilderInvalidDiscount() {
+    void testVoucherBuilderLessThanZeroDiscount() {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
             new Voucher.VoucherBuilder("1", "Test Voucher", "Description", -10.0).build();
         });
@@ -88,4 +88,41 @@ public class VoucherTest {
 
         assertTrue(actualMessage.contains(expectedMessage));
     }
+
+    @Test
+    void testVoucherBuilderMoreThanHundredDiscount() {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            new Voucher.VoucherBuilder("1", "Test Voucher", "Description", 110.0).build();
+        });
+
+        String expectedMessage = "voucherDiscount";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void testVoucherBuilderWithEmptyName() {
+        Exception exception = assertThrows(NullPointerException.class, () -> {
+            new Voucher.VoucherBuilder("1", "", "Description", 10.0).build();
+        });
+
+        String expectedMessage = "voucherName";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
+    @Test
+    void testVoucherBuilderWithEmptyDescription() {
+        Exception exception = assertThrows(NullPointerException.class, () -> {
+            new Voucher.VoucherBuilder("1", "Test Voucher", "", 10.0).build();
+        });
+
+        String expectedMessage = "voucherDescription";
+        String actualMessage = exception.getMessage();
+
+        assertTrue(actualMessage.contains(expectedMessage));
+    }
+
 }

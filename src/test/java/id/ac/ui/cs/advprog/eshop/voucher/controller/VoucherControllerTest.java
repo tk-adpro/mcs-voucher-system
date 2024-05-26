@@ -154,4 +154,32 @@ public class VoucherControllerTest {
 
         verify(voucherService, times(1)).delete(voucherId);
     }
+
+    @Test
+    public void testUseVoucherSuccess() throws Exception {
+        String voucherId = "1";
+        Voucher voucher = new Voucher();
+        voucher.setVoucherId(voucherId);
+
+        when(voucherService.useVoucher(anyString())).thenReturn(voucher);
+
+        mockMvc.perform(post("/voucher-api/public/use/{voucherId}", voucherId))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Voucher used successfully: " + voucherId));
+
+        verify(voucherService, times(1)).useVoucher(voucherId);
+    }
+
+    @Test
+    public void testUseVoucherFailure() throws Exception {
+        String voucherId = "1";
+
+        when(voucherService.useVoucher(anyString())).thenThrow(new IllegalStateException("Voucher cannot be used"));
+
+        mockMvc.perform(post("/voucher-api/public/use/{voucherId}", voucherId))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string("Voucher cannot be used"));
+
+        verify(voucherService, times(1)).useVoucher(voucherId);
+    }
 }
