@@ -17,6 +17,10 @@ public class VoucherServiceImpl implements VoucherService {
     @Autowired
     private VoucherRepository voucherRepository;
 
+    private static final String VOUCHER_TYPE_USAGE_LIMIT = "Usage Limit";
+    private static final String VOUCHER_TYPE_EXPIRED_DATE = "Expired Date";
+    private static final String VOUCHER_TYPE_BOTH = "Expired Date and Usage Limit";
+
     @Override
     public Voucher create(Voucher voucher) {
         return createOrUpdate(voucher);
@@ -42,16 +46,16 @@ public class VoucherServiceImpl implements VoucherService {
 
         Voucher.VoucherBuilder builder = new Voucher.VoucherBuilder(voucherId, voucherName, voucherDescription, voucherDiscount);
 
-        if (Objects.equals(voucherType, "Usage Limit")) {
+        if (Objects.equals(voucherType, VOUCHER_TYPE_USAGE_LIMIT)) {
             builder.setUsageLimit(voucherUsageLimit);
-            builder.setType("Usage Limit");
-        } else if (Objects.equals(voucherType, "Expired Date")) {
+            builder.setType(VOUCHER_TYPE_USAGE_LIMIT);
+        } else if (Objects.equals(voucherType, VOUCHER_TYPE_EXPIRED_DATE)) {
             builder.setVoucherDate(voucherStartDate, voucherEndDate);
-            builder.setType("Expired Date");
+            builder.setType(VOUCHER_TYPE_EXPIRED_DATE);
         } else {
             builder.setVoucherDate(voucherStartDate, voucherEndDate);
             builder.setUsageLimit(voucherUsageLimit);
-            builder.setType("Expired Date and Usage Limit");
+            builder.setType(VOUCHER_TYPE_BOTH);
         }
 
         voucher = builder.build();
@@ -94,9 +98,9 @@ public class VoucherServiceImpl implements VoucherService {
 
         String voucherType = voucher.getVoucherType();
 
-        if ("Expired Date".equals(voucherType)) {
+        if (VOUCHER_TYPE_EXPIRED_DATE.equals(voucherType)) {
             return isDateValid;
-        } else if ("Usage Limit".equals(voucherType)) {
+        } else if (VOUCHER_TYPE_USAGE_LIMIT.equals(voucherType)) {
             return isUsageValid;
         } else {
             return isDateValid && isUsageValid;
@@ -111,8 +115,8 @@ public class VoucherServiceImpl implements VoucherService {
             String voucherType = voucher.getVoucherType();
 
             if (canUseVoucher(voucher)) {
-                if (Objects.equals(voucherType, "Usage Limit") ||
-                        Objects.equals(voucherType, "Expired Date and Usage Limit")){
+                if (Objects.equals(voucherType, VOUCHER_TYPE_USAGE_LIMIT) ||
+                        Objects.equals(voucherType, VOUCHER_TYPE_BOTH)){
                     voucher.setVoucherUsageLimit(voucher.getVoucherUsageLimit() - 1);
                 }
                 voucherRepository.save(voucher);
