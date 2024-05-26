@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -76,17 +77,32 @@ public class VoucherServiceImpl implements VoucherService {
 
     public boolean canUseVoucher(Voucher voucher) {
         LocalDate today = LocalDate.now();
-        boolean isDateValid = (voucher.getVoucherStartDate() == null || !voucher.getVoucherStartDate().isAfter(today)) &&
-                (voucher.getVoucherEndDate() == null || !voucher.getVoucherEndDate().isBefore(today));
+
+        boolean isDateValid = true;
+        LocalDate startDate = voucher.getVoucherStartDate();
+        LocalDate endDate = voucher.getVoucherEndDate();
+
+        if (startDate != null && startDate.isAfter(today)) {
+            isDateValid = false;
+        }
+
+        if (endDate != null && endDate.isBefore(today)) {
+            isDateValid = false;
+        }
+
         boolean isUsageValid = voucher.getVoucherUsageLimit() > 0;
 
-        return switch (voucher.getVoucherType()) {
-            case "Expired Date" -> isDateValid;
-            case "Usage Limit" -> isUsageValid;
-            case "Expired Date and Usage Limit" -> isDateValid && isUsageValid;
-            default -> throw new IllegalArgumentException("Unknown voucher type: " + voucher.getVoucherType());
-        };
+        String voucherType = voucher.getVoucherType();
+
+        if ("Expired Date".equals(voucherType)) {
+            return isDateValid;
+        } else if ("Usage Limit".equals(voucherType)) {
+            return isUsageValid;
+        } else {
+            return isDateValid && isUsageValid;
+        }
     }
+
 
     public Voucher useVoucher(String voucherId) {
         Optional<Voucher> voucherOptional = voucherRepository.findById(voucherId);
@@ -102,6 +118,8 @@ public class VoucherServiceImpl implements VoucherService {
                 voucherRepository.save(voucher);
                 return voucher;
             }
+        } else {
+            throw new NoSuchElementException("Voucher cannot be used.");
         }
         throw new IllegalStateException("Voucher cannot be used.");
     }

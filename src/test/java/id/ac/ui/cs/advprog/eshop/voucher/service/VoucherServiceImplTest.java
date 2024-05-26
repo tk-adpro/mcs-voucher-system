@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,7 +32,9 @@ public class VoucherServiceImplTest {
     private Voucher dateVoucher;
     private Voucher usageLimitVoucher;
     private Voucher bothVoucher;
-    private Voucher expiredVoucher;
+    private Voucher expiredVoucher1;
+    private Voucher expiredVoucher2;
+
 
     @BeforeEach
     void setUp() {
@@ -57,8 +60,14 @@ public class VoucherServiceImplTest {
                 .setType("Expired Date and Usage Limit")
                 .build();
 
-        expiredVoucher = new Voucher.VoucherBuilder("5", "Expired Voucher", "Description", 10.0)
+        expiredVoucher1 = new Voucher.VoucherBuilder("5", "Expired Voucher", "Description", 10.0)
                 .setVoucherDate(LocalDate.now().minusDays(10), LocalDate.now().minusDays(1))
+                .setUsageLimit(0)
+                .setType("Expired Date and Usage Limit")
+                .build();
+
+        expiredVoucher2 = new Voucher.VoucherBuilder("6", "Expired Voucher", "Description", 10.0)
+                .setVoucherDate(LocalDate.now().plusDays(10), LocalDate.now().plusDays(20))
                 .setUsageLimit(0)
                 .setType("Expired Date and Usage Limit")
                 .build();
@@ -197,8 +206,13 @@ public class VoucherServiceImplTest {
     }
 
     @Test
-    void testCanUseVoucher_Expired() {
-        assertFalse(voucherService.canUseVoucher(expiredVoucher));
+    void testCanUseVoucher1_Expired() {
+        assertFalse(voucherService.canUseVoucher(expiredVoucher1));
+    }
+
+    @Test
+    void testCanUseVoucher2_Expired() {
+        assertFalse(voucherService.canUseVoucher(expiredVoucher2));
     }
 
     @Test
@@ -223,8 +237,25 @@ public class VoucherServiceImplTest {
     }
 
     @Test
-    void testUseVoucher_Expired() {
-        when(voucherRepository.findById(anyString())).thenReturn(Optional.of(expiredVoucher));
+    void testUseVoucher1_Expired() {
+        when(voucherRepository.findById(anyString())).thenReturn(Optional.of(expiredVoucher1));
         assertThrows(IllegalStateException.class, () -> voucherService.useVoucher("5"));
+    }
+
+    @Test
+    void testUseVoucher2_Expired() {
+        when(voucherRepository.findById(anyString())).thenReturn(Optional.of(expiredVoucher2));
+        assertThrows(IllegalStateException.class, () -> voucherService.useVoucher("6"));
+    }
+
+    @Test
+    void testUseVoucher_NotFound() {
+        String voucherId = "999"; // An ID that doesn't exist
+
+        // Mock the repository to return an empty Optional when searching for the voucher ID
+        when(voucherRepository.findById(voucherId)).thenReturn(Optional.empty());
+
+        // Verify that using a non-existent voucher ID throws NoSuchElementException
+        assertThrows(NoSuchElementException.class, () -> voucherService.useVoucher(voucherId));
     }
 }

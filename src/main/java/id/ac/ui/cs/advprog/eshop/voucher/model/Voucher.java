@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Table(name = "voucher")
@@ -68,22 +69,31 @@ public class Voucher {
         private int voucherUsageLimit;
 
         public VoucherBuilder(String voucherId, String voucherName, String voucherDescription, double voucherDiscount) {
-            if (voucherId == null || voucherId.isEmpty()) {
-                throw new NullPointerException("voucherId is required");
+
+            this.voucherId = voucherId;
+
+            // Ensure voucherName is not null or empty
+            this.voucherName = Objects.requireNonNull(voucherName, "voucherName is required");
+            if (voucherName.isEmpty()) {
+                throw new NullPointerException("voucherName cannot be empty");
             }
-            if (voucherName == null || voucherName.isEmpty()) {
-                throw new NullPointerException("voucherName is required");
+
+            // Ensure voucherDescription is not null or empty
+            this.voucherDescription = Objects.requireNonNull(voucherDescription, "voucherDescription is required");
+            if (voucherDescription.isEmpty()) {
+                throw new NullPointerException("voucherDescription cannot be empty");
             }
-            if (voucherDescription == null || voucherDescription.isEmpty()) {
-                throw new NullPointerException("voucherDescription is required");
-            }
-            if (voucherDiscount <= 0 || voucherDiscount >= 100) {
+
+            // Ensure voucherDiscount is within the valid range
+            if (voucherDiscount <= 0) {
                 throw new IllegalArgumentException("voucherDiscount must be between 0 and 100");
             }
 
-            this.voucherId = voucherId;
-            this.voucherName = voucherName;
-            this.voucherDescription = voucherDescription;
+            // Ensure voucherDiscount is within the valid range
+            if (voucherDiscount >= 100) {
+                throw new IllegalArgumentException("voucherDiscount must be between 0 and 100");
+            }
+
             this.voucherDiscount = voucherDiscount;
         }
 
