@@ -64,13 +64,45 @@ public class VoucherServiceImpl implements VoucherService {
     }
 
     @Override
+    public Optional<Voucher> findById(String voucherId) {
+        return voucherRepository.findById(voucherId);
+    }
+
+    @Override
     public boolean delete(String voucherId) {
         voucherRepository.deleteById(voucherId);
         return true;
     }
 
-    @Override
-    public Optional<Voucher> findById(String voucherId) {
-        return voucherRepository.findById(voucherId);
+    public boolean canUseVoucher(Voucher voucher) {
+        LocalDate today = LocalDate.now();
+        boolean isDateValid = (voucher.getVoucherStartDate() == null || !voucher.getVoucherStartDate().isAfter(today)) &&
+                (voucher.getVoucherEndDate() == null || !voucher.getVoucherEndDate().isBefore(today));
+        boolean isUsageValid = voucher.getVoucherUsageLimit() > 0;
+
+        return switch (voucher.getVoucherType()) {
+            case "Expired Date" -> isDateValid;
+            case "Usage Limit" -> isUsageValid;
+            case "Expired Date and Usage Limit" -> isDateValid && isUsageValid;
+            default -> throw new IllegalArgumentException("Unknown voucher type: " + voucher.getVoucherType());
+        };
+    }
+
+    public Voucher useVoucher(String voucherId) {
+        Optional<Voucher> voucherOptional = voucherRepository.findById(voucherId);
+        if (voucherOptional.isPresent()) {
+            Voucher voucher = voucherOptional.get();
+            String voucherType = voucher.getVoucherType();
+
+            if (canUseVoucher(voucher)) {
+                if (Objects.equals(voucherType, "Usage Limit") ||
+                        Objects.equals(voucherType, "Expired Date and Usage Limit")){
+                    voucher.setVoucherUsageLimit(voucher.getVoucherUsageLimit() - 1);
+                }
+                voucherRepository.save(voucher);
+                return voucher;
+            }
+        }
+        throw new IllegalStateException("Voucher cannot be used.");
     }
 }

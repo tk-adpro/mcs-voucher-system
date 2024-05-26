@@ -29,6 +29,16 @@ public class VoucherController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/public/use/{voucherId}")
+    public ResponseEntity<String> useVoucher(@PathVariable String voucherId) {
+        try {
+            Voucher voucher = voucherService.useVoucher(voucherId);
+            return ResponseEntity.ok("Voucher used successfully: " + voucher.getVoucherId());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body("Voucher cannot be used");
+        }
+    }
+
     @PostMapping("/admin/create")
     public ResponseEntity<Voucher> createVoucherPost (@RequestBody Voucher voucher) {
         Voucher createdProduct = voucherService.create(voucher);
