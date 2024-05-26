@@ -18,7 +18,7 @@ public class SecurityConfig {
     AuthenticationFilter authenticationFilter;
 
     @Autowired
-    CorsConfigurationSource corsConfigurationSource; // Autowire CorsConfigurationSource
+    CorsConfigurationSource corsConfigurationSource;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
